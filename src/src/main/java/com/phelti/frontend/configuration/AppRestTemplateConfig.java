@@ -9,6 +9,7 @@ import org.springframework.web.client.RestTemplate;
 @Configuration
 public class AppRestTemplateConfig {
 
+    @Bean
     public RestTemplate restTemplate(
             @Value("${phelti.backend.connect-timeout-ms:5000}") int connectTimeout,
             @Value("${phelti.backend.read-timeout-ms:10000}") int readTimeout,
