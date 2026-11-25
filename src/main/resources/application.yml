@@ -1,0 +1,26 @@
+server:
+  port: 8081
+  address: ${PHELTI_BIND_ADDRESS:127.0.0.1}
+
+spring:
+  application:
+    name: phelti-frontend
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+    encoding: UTF-8
+    cache: false
+  mvc:
+    format:
+      date: yyyy-MM-dd
+      time: HH:mm
+      date-time: yyyy-MM-dd'T'HH:mm
+
+phelti:
+  backend:
+    base-url: ${PHELTI_BACKEND_URL:http://localhost:8080/api}
+    connect-timeout-ms: 5000
+    read-timeout-ms: 10000
+  demo:
+    key: ${PHELTI_DEMO_KEY:}
