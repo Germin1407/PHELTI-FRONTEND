@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Programar actividad | PHELTI</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" th:href="@{/img/logo-phelti.svg}">
+  <link rel="stylesheet" th:href="@{/css/phelti.css}">
+</head>
+<body>
+  <nav th:replace="~{fragments/layout :: navegacion}"></nav>
+  <div class="layout-shell">
+    <aside th:replace="~{fragments/layout :: lateral}"></aside>
+    <main class="main-content" id="contenido">
+      <div th:replace="~{fragments/layout :: alertas}"></div>
+      <header class="page-heading"><p class="eyebrow">ACUERDO ACEPTADO</p><h1>Acordar el horario</h1><p>El solicitante define las condiciones; el prestador las acepta. Solo entonces se reserva el valor acordado.</p></header>
+<div class="row g-4"><div class="col-lg-5"><section class="panel"><p class="eyebrow">ACUERDO</p><h2 th:text="${publicacion.title}">Título</h2><dl class="detail-list"><dt>Modalidad</dt><dd><span th:replace="~{fragments/layout :: modalidad(${publicacion.interactionMode})}">Modalidad</span></dd><dt>Persona que paga</dt><dd th:text="${usuariosMap[publicacion.publicationType == 'OFFERS_SUPPORT' ? propuesta.proposingUserId : publicacion.userId]}">Pagador</dd><dt>Persona que ofrece el servicio</dt><dd th:text="${usuariosMap[publicacion.publicationType == 'OFFERS_SUPPORT' ? publicacion.userId : propuesta.proposingUserId]}">Prestador</dd><dt>Publicación de</dt><dd th:text="${usuariosMap[publicacion.userId] ?: 'Usuario'}">Usuario</dd><dt>Proponente</dt><dd th:text="${usuariosMap[propuesta.proposingUserId] ?: 'Usuario'}">Usuario</dd><dt>Monto</dt><dd th:text="${propuesta.proposedAmount != null ? propuesta.proposedAmount + ' phelts' : publicacion.pheltAmount + ' phelts'}">Monto</dd></dl></section></div>
+<div class="col-lg-7"><section class="panel" th:if="${horarioPendiente == null and solicitanteActivo}"><h2>Propón las condiciones</h2><p class="small text-muted">Hora de Colombia. Confirma las condiciones con la otra persona antes de programar.</p><form th:object="${actividadForm}" th:action="@{/actividades/programar}" method="post" class="row g-3"><input type="hidden" th:field="*{proposalId}">
+  <div class="col-md-6"><label class="form-label" for="activityDate">Fecha *</label><input class="form-control" type="date" id="activityDate" th:field="*{activityDate}" required></div>
+  <div class="col-md-6"><label class="form-label" for="activityTime">Hora *</label><input class="form-control" type="time" step="60" id="activityTime" th:field="*{activityTime}" required></div>
+  <div class="col-md-6"><label class="form-label" for="durationMinutes">Duración (minutos) *</label><input class="form-control" type="number" step="1" min="1" id="durationMinutes" th:field="*{durationMinutes}" required></div>
+  <div class="col-12" th:if="${publicacion.interactionMode == 'PRESENTIAL'}"><label class="form-label" for="location">Lugar del encuentro *</label><input class="form-control" id="location" th:field="*{location}" maxlength="200" placeholder="Dirección o sitio acordado" required></div>
+  <div class="col-12" th:if="${publicacion.interactionMode == 'VIRTUAL'}"><label class="form-label" for="virtualLink">Enlace de la reunión *</label><input class="form-control" type="url" id="virtualLink" th:field="*{virtualLink}" maxlength="300" placeholder="https://..." required></div>
+  <div class="col-12"><button class="btn btn-primary" type="submit">Enviar horario al prestador</button> <a class="btn btn-outline-secondary" th:href="@{/propuestas}">Volver</a></div>
+</form></section>
+<section class="panel" th:if="${horarioPendiente == null and !solicitanteActivo}"><h2>Esperando al solicitante</h2><p>La persona que recibe el servicio debe proponer la fecha, la hora, la duración y el lugar o enlace.</p><a th:href="@{/propuestas}" class="btn btn-outline-primary">Volver a propuestas</a></section>
+<section class="panel" th:if="${horarioPendiente != null}">
+  <h2>Horario propuesto</h2><p class="text-muted">Aún no se han reservado phelts. El acuerdo se confirma cuando el prestador acepta.</p>
+  <dl class="detail-list mb-3"><dt>Fecha y hora (Colombia)</dt><dd th:text="${@formatoVista.fecha(horarioPendiente.activityDate) + ' · ' + @formatoVista.fecha(horarioPendiente.activityTime)}">Fecha</dd><dt>Duración</dt><dd th:text="${horarioPendiente.durationMinutes + ' min'}">Duración</dd><dt th:if="${horarioPendiente.location != null}">Lugar</dt><dd th:if="${horarioPendiente.location != null}" th:text="${horarioPendiente.location}">Lugar</dd><dt th:if="${horarioPendiente.virtualLink != null}">Reunión</dt><dd th:if="${horarioPendiente.virtualLink != null}" th:text="${horarioPendiente.virtualLink}">Enlace</dd></dl>
+  <div class="d-flex gap-2 flex-wrap"><form th:unless="${solicitanteActivo}" method="post" th:action="@{/actividades/horario/{id}/aceptar(id=${horarioPendiente.scheduleId})}" data-confirm="¿Aceptar este horario y reservar el importe acordado?"><input type="hidden" name="propuestaId" th:value="${propuesta.proposalId}"><button class="btn btn-primary" type="submit">Aceptar y programar</button></form><form method="post" th:action="@{/actividades/horario/{id}/rechazar(id=${horarioPendiente.scheduleId})}" data-confirm="¿Cerrar esta solicitud de horario?"><input type="hidden" name="propuestaId" th:value="${propuesta.proposalId}"><button class="btn btn-outline-danger" type="submit" th:text="${solicitanteActivo ? 'Retirar horario' : 'Rechazar horario'}">Cerrar horario</button></form></div>
+</section>
+<section class="panel mt-3"><h2>Cancelar acuerdo</h2><p class="small text-muted">Si no logran acordar las condiciones, puedes cerrar el acuerdo. La publicación volverá a estar disponible.</p><form method="post" th:action="@{/actividades/acuerdo/{id}/cancelar(id=${propuesta.proposalId})}" data-confirm="¿Cancelar este acuerdo sin actividad programada?"><button class="btn btn-outline-danger" type="submit">Cancelar acuerdo</button></form></section>
+<section class="panel mt-3" th:unless="${#lists.isEmpty(horarios)}"><h2>Historial de horarios</h2><div class="item-row" th:each="h : ${horarios}"><div><strong th:text="${@formatoVista.fecha(h.activityDate) + ' · ' + @formatoVista.fecha(h.activityTime)}">Fecha</strong><p class="small text-muted mb-0" th:text="${h.durationMinutes + ' min · ' + @formatoVista.fecha(h.createdAt)}">Duración</p></div><span th:replace="~{fragments/layout :: estado(${h.status})}"></span></div></section>
+</div></div>
+      <footer th:replace="~{fragments/layout :: pie}"></footer>
+    </main>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
+  <script th:src="@{/js/phelti.js}" defer></script>
+</body>
+</html>
