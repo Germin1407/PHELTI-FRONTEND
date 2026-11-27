@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Publicación | PHELTI</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" th:href="@{/img/logo-phelti.svg}">
+  <link rel="stylesheet" th:href="@{/css/phelti.css}">
+</head>
+<body>
+  <nav th:replace="~{fragments/layout :: navegacion}"></nav>
+  <div class="layout-shell">
+    <aside th:replace="~{fragments/layout :: lateral}"></aside>
+    <main class="main-content" id="contenido">
+      <div th:replace="~{fragments/layout :: alertas}"></div>
+      <header class="page-heading"><p class="eyebrow">PUBLICACIONES</p><h1 th:text="${edicion ? 'Editar publicación' : 'Nueva publicación'}">Publicación</h1><p>Completa los datos del servicio y su valor en phelts.</p></header>
+<section class="panel narrow-panel-wide">
+  <form method="post" th:object="${publicacionForm}" th:action="${edicion} ? @{/publicaciones/{id}/actualizar(id=${publicacionId})} : @{/publicaciones/crear}" class="row g-3">
+    <input type="hidden" th:field="*{userId}"><input type="hidden" th:field="*{publicationStatus}">
+    <div class="col-md-6"><label class="form-label" for="publicationType">Tipo de publicación *</label><select class="form-select" id="publicationType" th:field="*{publicationType}" required><option value="">Selecciona...</option><option value="OFFERS_SUPPORT">Ofrece apoyo</option><option value="NEEDS_SUPPORT">Necesita apoyo</option></select></div>
+    <div class="col-md-6"><label class="form-label" for="categoryId">Categoría *</label><select class="form-select" id="categoryId" th:field="*{categoryId}" required><option value="">Selecciona...</option><option th:each="c : ${categoriasMap}" th:value="${c.key}" th:text="${c.value}">Categoría</option></select></div>
+    <div class="col-12"><label class="form-label" for="title">Título *</label><input class="form-control" th:field="*{title}" id="title" maxlength="150" required placeholder="Ej. Clases de matemáticas por una hora"></div>
+    <div class="col-12"><label class="form-label" for="description">Descripción *</label><textarea class="form-control" th:field="*{description}" id="description" required rows="4" placeholder="Explica con claridad lo que ofreces o necesitas" maxlength="4000"></textarea></div>
+    <div class="col-md-6"><label class="form-label" for="interactionMode">Modalidad *</label><select class="form-select" th:field="*{interactionMode}" id="interactionMode" required><option value="">Selecciona...</option><option value="VIRTUAL">Virtual</option><option value="PRESENTIAL">Presencial</option></select></div>
+    <div class="col-md-6"><label class="form-label" for="pheltAmount">Valor en phelts *</label><input class="form-control" type="number" step="0.01" min="0.01" max="99999999.99" th:field="*{pheltAmount}" id="pheltAmount" required></div>
+    <div class="col-12" data-balance-warning hidden th:attr="data-balance=${saldoDisponible}"><div class="alert alert-warning mb-0">El saldo disponible no cubre esta solicitud. <a th:href="@{/billetera}">Consulta tu billetera</a>.</div></div><div class="col-md-6"><label class="form-label" for="durationMinutes">Duración estimada (minutos) *</label><input class="form-control" type="number" min="1" step="1" th:field="*{durationMinutes}" id="durationMinutes" required placeholder="Ej. 60"></div>
+    <div class="col-12"><div class="form-check form-switch"><input type="checkbox" class="form-check-input" th:field="*{negotiable}" id="negotiable"><label class="form-check-label" for="negotiable">Permitir negociar el valor propuesto</label></div></div>
+    <div class="col-12 d-flex flex-wrap gap-2"><button type="submit" class="btn btn-primary" th:text="${edicion ? 'Guardar cambios' : 'Publicar'}">Publicar</button><a th:href="@{/publicaciones/mias}" class="btn btn-outline-secondary">Cancelar</a></div>
+  </form>
+</section>
+      <footer th:replace="~{fragments/layout :: pie}"></footer>
+    </main>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
+  <script th:src="@{/js/phelti.js}" defer></script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mi perfil | PHELTI</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" th:href="@{/img/logo-phelti.svg}">
+  <link rel="stylesheet" th:href="@{/css/phelti.css}">
+</head>
+<body>
+  <nav th:replace="~{fragments/layout :: navegacion}"></nav>
+  <div class="layout-shell">
+    <aside th:replace="~{fragments/layout :: lateral}"></aside>
+    <main class="main-content" id="contenido">
+      <div th:replace="~{fragments/layout :: alertas}"></div>
+      <header class="page-heading"><p class="eyebrow">CUENTA</p><h1>Mi perfil</h1><p>Actualiza tu información, conecta habilidades e indica cuándo puedes intercambiar tiempo.</p></header>
+<div class="section-tabs" data-tabs="perfil"><a href="#datos" class="btn btn-outline-primary btn-sm">Datos personales</a><a href="#habilidades" class="btn btn-outline-primary btn-sm">Habilidades</a><a href="#intereses" class="btn btn-outline-primary btn-sm">Intereses</a><a href="#disponibilidad" class="btn btn-outline-primary btn-sm">Disponibilidad</a><a href="#reputacion" class="btn btn-outline-primary btn-sm">Métricas</a></div>
+<section class="panel mb-4" id="datos"><h2>Datos personales</h2>
+  <div class="small text-muted mb-3">Correo registrado: <strong th:text="${usuario.email}">Correo</strong></div>
+  <form th:action="@{/perfil/guardar}" th:object="${perfilForm}" method="post" class="row g-3">
+    <div class="col-md-6"><label for="name" class="form-label">Nombre *</label><input id="name" class="form-control" th:field="*{name}" required maxlength="100"></div>
+    <div class="col-md-6"><label for="location" class="form-label">Ubicación</label><input id="location" class="form-control" th:field="*{location}" maxlength="150" placeholder="Ciudad"></div>
+    <div class="col-md-6"><label for="preferredInteractionMode" class="form-label">Modalidad preferida</label><select id="preferredInteractionMode" class="form-select" th:field="*{preferredInteractionMode}"><option value="">Sin preferencia</option><option value="VIRTUAL">Virtual</option><option value="PRESENTIAL">Presencial</option></select></div>
+    <div class="col-12"><label for="description" class="form-label">Descripción</label><textarea id="description" rows="3" class="form-control" th:field="*{description}" maxlength="1500"></textarea></div>
+    <div class="col-12"><button class="btn btn-primary" type="submit">Guardar perfil</button></div>
+  </form>
+</section>
+<section id="habilidades" class="panel"><h2>Mis habilidades</h2><p class="small text-muted">Qué sabes hacer y puedes ofrecer.</p>
+    <div class="item-row" th:each="h : ${habilidadesUsuario}"><span th:text="${h.name}">Habilidad</span><form method="post" th:action="@{/perfil/habilidades/{id}/quitar(id=${h.skillId})}" data-confirm="¿Quitar esta habilidad?"><button type="submit" class="btn btn-sm btn-outline-danger">Quitar</button></form></div>
+    <p th:if="${#lists.isEmpty(habilidadesUsuario)}" class="text-muted small">Aún no has añadido habilidades.</p>
+    <p class="empty-state" th:if="${#lists.isEmpty(habilidadesCatalogo)}">No hay opciones nuevas para añadir.</p><form th:unless="${#lists.isEmpty(habilidadesCatalogo)}" th:action="@{/perfil/habilidades/asignar}" method="post" class="input-group mt-3"><select class="form-select" name="skillId" aria-label="Habilidad" required><option value="">Seleccionar habilidad...</option><option th:each="h : ${habilidadesCatalogo}" th:value="${h.skillId}" th:text="${h.name}">Habilidad</option></select><button type="submit" class="btn btn-outline-primary">Añadir</button></form>
+  </section>
+  <section id="intereses" class="panel"><h2>Mis intereses</h2><p class="small text-muted">Qué te gustaría aprender o recibir.</p>
+    <div class="item-row" th:each="i : ${interesesUsuario}"><span th:text="${i.name}">Interés</span><form method="post" th:action="@{/perfil/intereses/{id}/quitar(id=${i.interestId})}" data-confirm="¿Quitar este interés?"><button type="submit" class="btn btn-sm btn-outline-danger">Quitar</button></form></div>
+    <p th:if="${#lists.isEmpty(interesesUsuario)}" class="text-muted small">Aún no has añadido intereses.</p>
+    <p class="empty-state" th:if="${#lists.isEmpty(interesesCatalogo)}">No hay opciones nuevas para añadir.</p><form th:unless="${#lists.isEmpty(interesesCatalogo)}" th:action="@{/perfil/intereses/asignar}" method="post" class="input-group mt-3"><select class="form-select" name="interestId" aria-label="Interés" required><option value="">Seleccionar interés...</option><option th:each="i : ${interesesCatalogo}" th:value="${i.interestId}" th:text="${i.name}">Interés</option></select><button type="submit" class="btn btn-outline-primary">Añadir</button></form>
+  </section>
+<section id="disponibilidad" class="panel mb-4"><h2>Mi disponibilidad</h2><p class="small text-muted">Los horarios se guardan en formato 24 horas; no pueden solaparse en el mismo día.</p>
+  <div class="table-responsive"><table class="table table-hover align-middle"><thead><tr><th>Día</th><th>Desde</th><th>Hasta</th><th></th></tr></thead><tbody><tr th:each="franja : ${disponibilidades}"><td><span th:replace="~{fragments/layout :: dia(${franja.dayOfWeek})}">Día</span></td><td th:text="${@formatoVista.fecha(franja.startTime)}">08:00</td><td th:text="${@formatoVista.fecha(franja.endTime)}">09:00</td><td class="text-end"><form method="post" th:action="@{/perfil/disponibilidad/{id}/eliminar(id=${franja.availabilityId})}" data-confirm="¿Eliminar este horario?"><button class="btn btn-sm btn-outline-danger" type="submit">Eliminar</button></form></td></tr><tr th:if="${#lists.isEmpty(disponibilidades)}"><td colspan="4" class="text-center text-muted">Todavía no hay horarios registrados.</td></tr></tbody></table></div>
+  <form th:object="${disponibilidadForm}" th:action="@{/perfil/disponibilidad/agregar}" method="post" class="row g-3 align-items-end">
+    <div class="col-md-4"><label class="form-label" for="dayOfWeek">Día *</label><select id="dayOfWeek" th:field="*{dayOfWeek}" class="form-select" required><option value="">Selecciona...</option><option value="MONDAY">Lunes</option><option value="TUESDAY">Martes</option><option value="WEDNESDAY">Miércoles</option><option value="THURSDAY">Jueves</option><option value="FRIDAY">Viernes</option><option value="SATURDAY">Sábado</option><option value="SUNDAY">Domingo</option></select></div>
+    <div class="col-md-3"><label class="form-label" for="startTime">Desde *</label><input id="startTime" type="time" step="60" class="form-control" th:field="*{startTime}" required></div>
+    <div class="col-md-3"><label class="form-label" for="endTime">Hasta *</label><input id="endTime" type="time" step="60" class="form-control" th:field="*{endTime}" required></div>
+    <div class="col-md-2"><button class="btn btn-primary w-100" type="submit">Agregar</button></div>
+  </form>
+</section>
+<section id="reputacion" class="panel"><h2>Métricas y reputación</h2>
+  <div class="stat-grid mb-3"><div><strong th:text="${metricas.totalActivities}">0</strong><span>Actividades totales</span></div><div><strong th:text="${metricas.completedActivities}">0</strong><span>Completadas</span></div><div><strong th:text="${metricas.cancelledActivities}">0</strong><span>Canceladas</span></div><div><strong th:text="${metricas.scheduledActivities}">0</strong><span>Programadas</span></div><div><strong th:text="${metricas.averageRating ?: '—'}">—</strong><span>Calificación media</span></div><div><strong th:text="${metricas.completionRate + ' %'}">0</strong><span>Tasa de finalización</span></div><div><strong th:text="${metricas.pheltsEarned}">0</strong><span>Phelts ganados</span></div><div><strong th:text="${metricas.pheltsSpent}">0</strong><span>Phelts gastados</span></div></div>
+  <h3 class="subheading">Calificaciones recibidas</h3><div th:each="r : ${calificaciones}" class="item-row"><div><strong th:text="${r.score + '/5'}">5/5</strong><p class="mb-0 text-muted" th:text="${r.comment ?: 'Sin comentario'}">Comentario</p></div><span class="small text-muted" th:text="${@formatoVista.fecha(r.createdAt)}">Fecha</span></div><p th:if="${#lists.isEmpty(calificaciones)}" class="text-muted">Aún no tienes calificaciones.</p>
+</section>
+      <footer th:replace="~{fragments/layout :: pie}"></footer>
+    </main>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
+  <script th:src="@{/js/phelti.js}" defer></script>
+</body>
+</html>

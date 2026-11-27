@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Buscar usuarios | PHELTI</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" th:href="@{/img/logo-phelti.svg}">
+  <link rel="stylesheet" th:href="@{/css/phelti.css}">
+</head>
+<body>
+  <nav th:replace="~{fragments/layout :: navegacion}"></nav>
+  <div class="layout-shell">
+    <aside th:replace="~{fragments/layout :: lateral}"></aside>
+    <main class="main-content" id="contenido">
+      <div th:replace="~{fragments/layout :: alertas}"></div>
+      <header class="page-heading"><p class="eyebrow">DIRECTORIO</p><h1>Usuarios de PHELTI</h1><p>Busca por nombre o utiliza los filtros de habilidades, intereses y disponibilidad.</p></header>
+<section class="panel mb-4">
+  <form method="get" th:action="@{/usuarios/buscar}" class="row g-3 align-items-end">
+    <div class="col-12"><label class="form-label" for="nombre">Buscar por nombre</label><input class="form-control" id="nombre" name="nombre" th:value="${nombre}" placeholder="Nombre de la persona" maxlength="100"></div><div class="col-md-3"><label class="form-label" for="skillId">Habilidad</label><select id="skillId" name="skillId" class="form-select"><option value="">Selecciona</option><option th:each="h : ${habilidades}" th:value="${h.skillId}" th:text="${h.name}" th:selected="${h.skillId == skillId}">Habilidad</option></select></div>
+    <div class="col-md-3"><label class="form-label" for="interestId">Interés</label><select id="interestId" name="interestId" class="form-select"><option value="">Selecciona</option><option th:each="i : ${intereses}" th:value="${i.interestId}" th:text="${i.name}" th:selected="${i.interestId == interestId}">Interés</option></select></div>
+    <div class="col-md-3"><label class="form-label" for="interactionMode">Modalidad</label><select id="interactionMode" name="interactionMode" class="form-select"><option value="">Selecciona</option><option value="VIRTUAL" th:selected="${interactionMode == 'VIRTUAL'}">Virtual</option><option value="PRESENTIAL" th:selected="${interactionMode == 'PRESENTIAL'}">Presencial</option></select></div>
+    <div class="col-md-3"><label class="form-label" for="dayOfWeek">Día</label><select id="dayOfWeek" name="dayOfWeek" class="form-select"><option value="">Selecciona</option><option value="MONDAY" th:selected="${dayOfWeek == 'MONDAY'}">Lunes</option><option value="TUESDAY" th:selected="${dayOfWeek == 'TUESDAY'}">Martes</option><option value="WEDNESDAY" th:selected="${dayOfWeek == 'WEDNESDAY'}">Miércoles</option><option value="THURSDAY" th:selected="${dayOfWeek == 'THURSDAY'}">Jueves</option><option value="FRIDAY" th:selected="${dayOfWeek == 'FRIDAY'}">Viernes</option><option value="SATURDAY" th:selected="${dayOfWeek == 'SATURDAY'}">Sábado</option><option value="SUNDAY" th:selected="${dayOfWeek == 'SUNDAY'}">Domingo</option></select></div>
+    <div class="col-12 d-flex gap-2"><button class="btn btn-primary" type="submit">Buscar usuarios</button><a th:href="@{/usuarios}" class="btn btn-outline-secondary">Limpiar</a><a th:href="@{/usuarios/registro}" class="btn btn-outline-primary ms-auto">Nuevo usuario</a></div>
+  </form>
+</section>
+<section class="panel" th:unless="${busquedaRealizada}"><div class="empty-state">Escribe un nombre o selecciona un filtro para buscar personas en PHELTI.</div></section>
+<section class="panel" th:if="${busquedaRealizada}"><h2>Resultados <small class="text-muted" th:text="${'(' + #lists.size(usuarios) + ')'}">(0)</small></h2>
+  <div th:if="${#lists.isEmpty(usuarios)}" class="empty-state">No se encontraron personas con esos filtros.</div>
+  <div class="directory-grid" th:unless="${#lists.isEmpty(usuarios)}"><div th:each="u : ${usuarios}">
+    <div class="listing-card person-card h-100"><div class="avatar" th:text="${#strings.substring(u.name,0,1)}">P</div><h3 class="mt-3" th:text="${u.name}">Nombre</h3><span class="tag mb-2" th:if="${u.userId == usuarioActivoId}">Tu perfil</span><div class="person-rating" th:text="${u.averageRating != null and u.averageRating > 0 ? u.averageRating + ' / 5 · Valoración media' : 'Sin valoraciones aún'}">Valoración</div><p class="small text-muted" th:if="${u.preferredInteractionMode != null}">Modalidad: <span th:replace="~{fragments/layout :: modalidad(${u.preferredInteractionMode})}"></span></p><p class="clamp-3" th:text="${u.description ?: 'Este usuario todavía no ha escrito una descripción.'}">Descripción</p><div class="d-flex justify-content-between align-items-center"><span class="small text-muted" th:text="${u.location ?: 'Sin ubicación'}">Ubicación</span><a class="btn btn-sm btn-outline-primary" th:href="@{/usuarios/{id}(id=${u.userId})}">Ver perfil</a></div></div>
+  </div></div>
+</section>
+      <footer th:replace="~{fragments/layout :: pie}"></footer>
+    </main>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
+  <script th:src="@{/js/phelti.js}" defer></script>
+</body>
+</html>
