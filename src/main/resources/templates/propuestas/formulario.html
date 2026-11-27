@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Enviar propuesta | PHELTI</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" th:href="@{/img/logo-phelti.svg}">
+  <link rel="stylesheet" th:href="@{/css/phelti.css}">
+</head>
+<body>
+  <nav th:replace="~{fragments/layout :: navegacion}"></nav>
+  <div class="layout-shell">
+    <aside th:replace="~{fragments/layout :: lateral}"></aside>
+    <main class="main-content" id="contenido">
+      <div th:replace="~{fragments/layout :: alertas}"></div>
+      <header class="page-heading"><p class="eyebrow">INTERCAMBIOS</p><h1>Enviar propuesta</h1><p>Responde a la publicación de otra persona.</p></header>
+<div class="row g-4"><div class="col-lg-5"><section class="panel"><p class="eyebrow">PUBLICACIÓN ELEGIDA</p><h2 th:text="${publicacion.title}">Título</h2><p th:text="${publicacion.description ?: 'Sin descripción'}">Descripción</p><dl class="detail-list"><dt>Autor</dt><dd th:text="${usuariosMap[publicacion.userId] ?: 'Usuario'}">Autor</dd><dt>Valor publicado</dt><dd th:text="${publicacion.pheltAmount + ' phelts'}">Valor</dd><dt>Negociable</dt><dd th:text="${publicacion.negotiable ? 'Sí' : 'No'}">No</dd></dl></section></div>
+<div class="col-lg-7"><section class="panel"><h2>Tu propuesta</h2><form th:object="${propuestaForm}" th:action="@{/propuestas/crear}" method="post" class="row g-3">
+  <input type="hidden" th:field="*{publicationId}"><input type="hidden" th:field="*{proposingUserId}">
+  <div class="col-12"><label for="message" class="form-label">Mensaje para el autor</label><textarea class="form-control" id="message" rows="5" maxlength="500" th:field="*{message}" placeholder="Explica cómo pueden realizar el intercambio"></textarea></div>
+  <div class="col-12" th:if="${publicacion.negotiable}"><label for="proposedAmount" class="form-label">Proponer otro valor de phelts (opcional)</label><input id="proposedAmount" class="form-control" th:field="*{proposedAmount}" type="number" step="0.01" min="0.01" placeholder="Deja vacío para aceptar el valor publicado"></div>
+  <div class="col-12" th:unless="${publicacion.negotiable}"><p class="small text-muted">Esta publicación tiene precio fijo: se usará el valor publicado.</p></div>
+  <div th:if="${saldoDisponible != null}" class="col-12" data-proposal-balance hidden th:attr="data-balance=${saldoDisponible},data-price=${publicacion.pheltAmount}"><div class="alert alert-warning">No tienes saldo suficiente para este importe. <a th:href="@{/billetera}">Consulta tu billetera</a>.</div></div><div class="col-12 d-flex gap-2"><button type="submit" class="btn btn-primary">Enviar propuesta</button><a class="btn btn-outline-secondary" th:href="@{/publicaciones/{id}(id=${publicacion.publicationId})}">Cancelar</a></div>
+</form></section></div></div>
+      <footer th:replace="~{fragments/layout :: pie}"></footer>
+    </main>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
+  <script th:src="@{/js/phelti.js}" defer></script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Detalle de propuesta | PHELTI</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" th:href="@{/img/logo-phelti.svg}">
+  <link rel="stylesheet" th:href="@{/css/phelti.css}">
+</head>
+<body>
+  <nav th:replace="~{fragments/layout :: navegacion}"></nav>
+  <div class="layout-shell">
+    <aside th:replace="~{fragments/layout :: lateral}"></aside>
+    <main class="main-content" id="contenido">
+      <div th:replace="~{fragments/layout :: alertas}"></div>
+      <header class="page-heading"><p class="eyebrow">PROPUESTAS</p><h1 th:text="${'Propuesta sobre ' + publicacion.title}">Detalle</h1><p><span th:replace="~{fragments/layout :: estado(${propuesta.proposalStatus})}">Estado</span></p></header>
+<div class="row g-4"><div class="col-lg-8"><section class="panel"><h2>Información de la propuesta</h2><dl class="detail-list"><dt>Publicación</dt><dd><a th:href="@{/publicaciones/{id}(id=${publicacion.publicationId})}" th:text="${publicacion.title}">Título</a></dd><dt>Autor de la publicación</dt><dd th:text="${usuariosMap[publicacion.userId] ?: 'Usuario'}">Autor</dd><dt>Proponente</dt><dd th:text="${usuariosMap[propuesta.proposingUserId] ?: 'Usuario'}">Proponente</dd><dt>Valor propuesto</dt><dd th:text="${propuesta.proposedAmount != null ? propuesta.proposedAmount + ' phelts' : (actividadAsociada != null ? actividadAsociada.agreedAmount + ' phelts' : publicacion.pheltAmount + ' phelts (precio actual)')}">Phelts</dd><dt>Mensaje</dt><dd class="pre-wrap" th:text="${propuesta.message ?: 'Sin mensaje'}">Mensaje</dd><dt>Enviada</dt><dd th:text="${@formatoVista.fecha(propuesta.createdAt)}">Fecha</dd></dl></section></div>
+<div class="col-lg-4"><section class="panel"><h2>Acciones</h2>
+  <div th:if="${usuarioActivoId == publicacion.userId and propuesta.proposalStatus == 'PENDING'}" class="d-grid gap-2"><form th:action="@{/propuestas/{id}/aceptar(id=${propuesta.proposalId})}" method="post"><button type="submit" class="btn btn-success w-100">Aceptar propuesta</button></form><form th:action="@{/propuestas/{id}/rechazar(id=${propuesta.proposalId})}" method="post"><button type="submit" class="btn btn-outline-danger w-100">Rechazar propuesta</button></form></div>
+  <a th:if="${propuesta.proposalStatus == 'ACCEPTED' and actividadAsociada == null}" class="btn btn-primary w-100 mb-2" th:href="@{/actividades/programar(propuestaId=${propuesta.proposalId})}">Acordar horario</a><a th:if="${actividadAsociada != null}" class="btn btn-outline-primary w-100" th:href="@{/actividades/{id}(id=${actividadAsociada.activityId})}">Ver actividad</a>
+  <form th:if="${usuarioActivoId == propuesta.proposingUserId and propuesta.proposalStatus == 'PENDING'}" th:action="@{/propuestas/{id}/eliminar(id=${propuesta.proposalId})}" method="post" data-confirm="¿Eliminar esta propuesta pendiente?"><button type="submit" class="btn btn-outline-danger w-100">Retirar propuesta</button></form>
+  <p class="small text-muted mt-3">La persona solicitante propone las condiciones y el prestador debe aceptarlas para programar la actividad.</p><a class="btn btn-link px-0" th:href="@{/propuestas}">Volver a propuestas</a>
+</section></div></div>
+      <footer th:replace="~{fragments/layout :: pie}"></footer>
+    </main>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
+  <script th:src="@{/js/phelti.js}" defer></script>
+</body>
+</html>
