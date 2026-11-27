@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Muro de publicaciones | PHELTI</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" th:href="@{/img/logo-phelti.svg}">
+  <link rel="stylesheet" th:href="@{/css/phelti.css}">
+</head>
+<body>
+  <nav th:replace="~{fragments/layout :: navegacion}"></nav>
+  <div class="layout-shell">
+    <aside th:replace="~{fragments/layout :: lateral}"></aside>
+    <main class="main-content" id="contenido">
+      <div th:replace="~{fragments/layout :: alertas}"></div>
+      <header class="page-heading d-flex justify-content-between flex-wrap gap-3 align-items-end"><div><p class="eyebrow">COMUNIDAD</p><h1 th:text="${soloMias ? 'Mis publicaciones' : 'Muro de publicaciones'}">Publicaciones</h1><p>Ofertas y necesidades para intercambiar tiempo.</p></div><a th:if="${usuarioActivoId != null}" class="btn btn-primary" th:href="@{/publicaciones/nueva}">+ Crear publicación</a></header>
+<section class="panel mb-4" th:unless="${soloMias}">
+  <form method="get" th:action="@{/publicaciones}" class="row g-3 align-items-end">
+    <div class="col-lg-3 col-md-6"><label class="form-label" for="keyword">Palabras clave</label><input class="form-control" id="keyword" name="keyword" placeholder="¿Qué buscas?" maxlength="150" th:value="${keyword}"></div>
+    <div class="col-lg-2 col-md-6"><label class="form-label" for="publicationType">Tipo</label><select class="form-select" id="publicationType" name="publicationType"><option value="">Selecciona</option><option value="OFFERS_SUPPORT" th:selected="${publicationType == 'OFFERS_SUPPORT'}">Ofrece apoyo</option><option value="NEEDS_SUPPORT" th:selected="${publicationType == 'NEEDS_SUPPORT'}">Necesita apoyo</option></select></div>
+    <div class="col-lg-2 col-md-6"><label class="form-label" for="interactionMode">Modalidad</label><select class="form-select" id="interactionMode" name="interactionMode"><option value="">Selecciona</option><option value="VIRTUAL" th:selected="${interactionMode == 'VIRTUAL'}">Virtual</option><option value="PRESENTIAL" th:selected="${interactionMode == 'PRESENTIAL'}">Presencial</option></select></div>
+    <div class="col-lg-2 col-md-6"><label class="form-label" for="categoryId">Categoría</label><select class="form-select" id="categoryId" name="categoryId"><option value="">Selecciona</option><option th:each="c : ${categoriasMap}" th:value="${c.key}" th:text="${c.value}" th:selected="${c.key == categoryId}">Categoría</option></select></div>
+    <div class="col-lg-1 col-md-6"><label class="form-label" for="maxPheltAmount">Máx.</label><input class="form-control" id="maxPheltAmount" name="maxPheltAmount" type="number" step="0.01" min="0.01" th:value="${maxPheltAmount}" placeholder="Phelts"></div>
+    <div class="col-lg-2 col-md-6"><label class="form-label" for="publicationStatus">Estado</label><select class="form-select" id="publicationStatus" name="publicationStatus"><option value="">Selecciona</option><option value="PUBLISHED" th:selected="${publicationStatus == 'PUBLISHED'}">Publicadas</option><option value="IN_PROGRESS" th:selected="${publicationStatus == 'IN_PROGRESS'}">En proceso</option><option value="COMPLETED" th:selected="${publicationStatus == 'COMPLETED'}">Completadas</option><option value="CANCELLED" th:selected="${publicationStatus == 'CANCELLED'}">Canceladas</option></select></div>
+    <div class="col-12"><button class="btn btn-primary" type="submit">Buscar publicaciones</button> <a class="btn btn-outline-secondary" th:href="@{/publicaciones}">Limpiar</a></div>
+  </form>
+</section>
+<section class="panel" th:if="${!soloMias and !busquedaRealizada}"><div class="empty-state">Escribe una palabra clave o selecciona un filtro para buscar publicaciones en PHELTI.</div></section>
+<section class="panel" th:if="${soloMias or busquedaRealizada}"><div class="section-title"><h2 th:text="${'Resultados (' + #lists.size(publicaciones) + ')'}">Resultados</h2><a th:if="${soloMias}" class="btn btn-sm btn-outline-secondary" th:href="@{/publicaciones}">Buscar en el muro</a></div>
+  <div th:if="${#lists.isEmpty(publicaciones)}" class="empty-state"><span th:text="${soloMias ? 'Todavía no tienes publicaciones.' : 'No se encontraron publicaciones con esos criterios.'}">No hay publicaciones.</span></div>
+  <div class="row g-3" th:unless="${#lists.isEmpty(publicaciones)}"><div class="col-lg-6 col-xl-4" th:each="pub : ${publicaciones}"><article class="listing-card h-100">
+    <div class="d-flex align-items-center justify-content-between gap-2 mb-2"><span class="tag" th:replace="~{fragments/layout :: tipo(${pub.publicationType})}">Tipo</span><span th:replace="~{fragments/layout :: estado(${pub.publicationStatus})}">Estado</span></div>
+    <h3 th:text="${pub.title}">Título</h3><p class="text-muted small clamp-3" th:text="${pub.description ?: 'Sin descripción.'}">Descripción</p>
+    <div class="small mb-2"><strong th:text="${usuariosMap[pub.userId] ?: 'Usuario'}">Autor</strong> · <span th:text="${categoriasMap[pub.categoryId] ?: 'Categoría'}">Categoría</span></div>
+    <div class="d-flex justify-content-between gap-2 small text-muted"><span th:replace="~{fragments/layout :: modalidad(${pub.interactionMode})}">Virtual</span><strong class="phelt-pill" th:text="${pub.pheltAmount + ' phelts'}">0 phelts</strong></div>
+    <div class="d-flex gap-2 align-items-center mt-3"><a class="btn btn-outline-primary btn-sm" th:href="@{/publicaciones/{id}(id=${pub.publicationId})}">Ver detalle</a><a th:if="${usuarioActivoId != null and usuarioActivoId == pub.userId and pub.publicationStatus == 'PUBLISHED'}" class="btn btn-outline-secondary btn-sm" th:href="@{/publicaciones/{id}/editar(id=${pub.publicationId})}">Editar</a></div>
+  </article></div></div>
+</section>
+      <footer th:replace="~{fragments/layout :: pie}"></footer>
+    </main>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
+  <script th:src="@{/js/phelti.js}" defer></script>
+</body>
+</html>

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Recomendaciones | PHELTI</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" th:href="@{/img/logo-phelti.svg}">
+  <link rel="stylesheet" th:href="@{/css/phelti.css}">
+</head>
+<body>
+  <nav th:replace="~{fragments/layout :: navegacion}"></nav>
+  <div class="layout-shell">
+    <aside th:replace="~{fragments/layout :: lateral}"></aside>
+    <main class="main-content" id="contenido">
+      <div th:replace="~{fragments/layout :: alertas}"></div>
+      <header class="page-heading"><p class="eyebrow">EMPAREJAMIENTO</p><h1>Publicaciones recomendadas</h1><p>Encuentra intercambios compatibles con tus habilidades, intereses, modalidad y disponibilidad.</p></header>
+<section class="panel"><h2>Coincidencias para ti <small class="text-muted" th:text="${'(' + #lists.size(coincidencias) + ')'}">(0)</small></h2>
+  <div class="empty-state" th:if="${#lists.isEmpty(coincidencias)}">Por ahora no encontramos publicaciones compatibles. <a th:href="@{/publicaciones}">Explora el muro</a> o revisa tus preferencias en el perfil.</div>
+  <div class="row g-3" th:unless="${#lists.isEmpty(coincidencias)}"><div class="col-lg-6" th:each="item : ${coincidencias}"><article class="listing-card h-100">
+    <div class="d-flex justify-content-between align-items-center"><span th:replace="~{fragments/layout :: tipo(${item.publication.publicationType})}">Tipo</span><strong class="phelt-pill" th:text="${item.score + ' puntos de coincidencia'}">Puntuación</strong></div>
+    <h3 class="mt-3" th:text="${item.publication.title}">Título</h3><p class="text-muted small" th:text="${usuariosMap[item.publication.userId] ?: 'Usuario'}">Autor</p><p th:text="${item.publication.description ?: 'Sin descripción'}">Descripción</p>
+    <p class="small fw-semibold mb-1">Razones de coincidencia</p><ul class="small text-muted"><li th:each="razon : ${item.reasons}" th:text="${@formatoVista.razon(razon)}">Razón</li></ul>
+    <div class="d-flex gap-2 justify-content-between align-items-center mt-3"><strong th:text="${item.publication.pheltAmount + ' phelts'}">Phelts</strong><a class="btn btn-sm btn-outline-primary" th:href="@{/publicaciones/{id}(id=${item.publication.publicationId})}">Ver publicación</a></div>
+  </article></div></div>
+</section>
+      <footer th:replace="~{fragments/layout :: pie}"></footer>
+    </main>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
+  <script th:src="@{/js/phelti.js}" defer></script>
+</body>
+</html>
