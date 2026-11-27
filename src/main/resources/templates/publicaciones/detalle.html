@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Detalle de publicación | PHELTI</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" th:href="@{/img/logo-phelti.svg}">
+  <link rel="stylesheet" th:href="@{/css/phelti.css}">
+</head>
+<body>
+  <nav th:replace="~{fragments/layout :: navegacion}"></nav>
+  <div class="layout-shell">
+    <aside th:replace="~{fragments/layout :: lateral}"></aside>
+    <main class="main-content" id="contenido">
+      <div th:replace="~{fragments/layout :: alertas}"></div>
+      <header class="page-heading"><p class="eyebrow">DETALLE DEL MURO</p><h1 th:text="${publicacion.title}">Publicación</h1><p><span th:replace="~{fragments/layout :: tipo(${publicacion.publicationType})}">Tipo</span> · <span th:replace="~{fragments/layout :: estado(${publicacion.publicationStatus})}">Estado</span></p></header>
+<div class="row g-4"><div class="col-lg-8"><section class="panel"><h2>Descripción de la publicación</h2><p class="pre-wrap" th:text="${publicacion.description ?: 'Sin descripción.'}">Descripción</p>
+  <div class="row g-3 mt-2"><div class="col-sm-6"><span class="detail-label">Publicado por</span><strong th:text="${usuariosMap[publicacion.userId] ?: 'Usuario'}">Autor</strong></div><div class="col-sm-6"><span class="detail-label">Categoría</span><strong th:text="${categoriasMap[publicacion.categoryId] ?: 'Categoría'}">Categoría</strong></div><div class="col-sm-6"><span class="detail-label">Modalidad</span><strong><span th:replace="~{fragments/layout :: modalidad(${publicacion.interactionMode})}">Modalidad</span></strong></div><div class="col-sm-6"><span class="detail-label">Negociación</span><strong th:text="${publicacion.negotiable ? 'Permitida' : 'Precio fijo'}">Negociación</strong></div><div class="col-sm-6"><span class="detail-label">Duración</span><strong th:text="${publicacion.durationMinutes != null ? publicacion.durationMinutes + ' minutos' : 'Por acordar'}">Duración</strong></div></div></section></div>
+<div class="col-lg-4"><section class="panel"><p class="eyebrow">VALOR DEL INTERCAMBIO</p><div class="balance-number" th:text="${publicacion.pheltAmount}">0</div><p class="text-muted">phelts</p>
+  <a th:if="${usuarioActivoId != null and usuarioActivoId != publicacion.userId and publicacion.publicationStatus == 'PUBLISHED' and propuestaActiva == null}" th:href="@{/propuestas/nueva(publicacionId=${publicacion.publicationId})}" class="btn btn-primary w-100 mb-2">Enviar propuesta</a>
+  <a th:if="${propuestaActiva != null}" th:href="@{/propuestas/{id}(id=${propuestaActiva.proposalId})}" class="btn btn-outline-primary w-100 mb-2">Ver mi propuesta</a>
+  <div th:if="${usuarioActivoId != null and usuarioActivoId == publicacion.userId and publicacion.publicationStatus == 'PUBLISHED'}"><a th:unless="${tienePendientes}" class="btn btn-outline-primary w-100 mb-2" th:href="@{/publicaciones/{id}/editar(id=${publicacion.publicationId})}">Editar publicación</a><form method="post" data-confirm="¿Retirar esta publicación? Ya no recibirá propuestas." th:action="@{/publicaciones/{id}/eliminar(id=${publicacion.publicationId})}"><button type="submit" class="btn btn-outline-danger w-100">Retirar publicación</button></form></div>
+  <p th:if="${usuarioActivoId == null}" class="small text-muted">Selecciona un usuario en <a th:href="@{/}">Inicio</a> para enviar una propuesta.</p>
+  <p th:if="${publicacion.publicationStatus != 'PUBLISHED'}" class="small text-muted">No se pueden enviar propuestas mientras la publicación no esté publicada.</p>
+  <a th:href="@{/publicaciones}" class="btn btn-link px-0 mt-2">Volver al muro</a></section></div></div>
+      <footer th:replace="~{fragments/layout :: pie}"></footer>
+    </main>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
+  <script th:src="@{/js/phelti.js}" defer></script>
+</body>
+</html>

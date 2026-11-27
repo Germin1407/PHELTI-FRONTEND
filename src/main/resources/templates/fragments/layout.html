@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"><body>
+<nav class="navbar navbar-expand-lg navbar-dark topbar sticky-top" th:fragment="navegacion">
+  <div class="container-fluid container-xl">
+    <a class="navbar-brand fw-bold" th:href="@{/}"><img class="brand-logo" th:src="@{/img/logo-phelti.svg}" alt="" width="26" height="30"> <span>PHELTI <span class="brand-suffix">APP</span></span></a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#topNav" aria-controls="topNav" aria-expanded="false" aria-label="Abrir menú"><span class="navbar-toggler-icon"></span></button>
+    <div class="collapse navbar-collapse" id="topNav">
+      <div class="navbar-nav ms-auto gap-lg-2 align-items-lg-center">
+        <a class="nav-link d-lg-none" th:href="@{/publicaciones}">Muro</a>
+        <a class="nav-link d-lg-none" th:href="@{/explorar/recomendadas}">Recomendados</a>
+        <a class="nav-link d-lg-none" th:href="@{/publicaciones/mias}">Mis publicaciones</a>
+        <a class="nav-link d-lg-none" th:href="@{/propuestas}">Propuestas</a>
+        <a class="nav-link d-lg-none" th:href="@{/actividades}">Actividades</a>
+        <a class="nav-link d-lg-none" th:href="@{/billetera}">Billetera</a>
+        <a class="nav-link d-lg-none" th:href="@{/perfil}">Perfil</a>
+        <span class="navbar-text" th:if="${usuarioActivoId != null}">Usuario activo: <strong th:text="${usuarioActivoNombre}">Nombre</strong></span>
+        <span class="navbar-text" th:unless="${usuarioActivoId != null}">Sin usuario seleccionado</span>
+        <details class="account-menu">
+          <summary class="btn account-toggle">Cambiar usuario <span aria-hidden="true">⌄</span></summary>
+          <div class="account-panel">
+            <p class="eyebrow">CUENTAS DISPONIBLES</p>
+            <input type="search" class="form-control mb-2" placeholder="Buscar por nombre" aria-label="Buscar cuenta" data-account-search>
+            <div class="account-list">
+              <form th:each="cuenta : ${cuentasDemo}" th:action="@{/sesion/seleccionar}" method="post" data-account-option>
+                <input type="hidden" name="usuarioId" th:value="${cuenta.userId}">
+                <button type="submit" class="account-option" th:disabled="${cuenta.userId == usuarioActivoId}"><span class="account-initial" th:text="${#strings.substring(cuenta.name,0,1)}">P</span><span th:text="${cuenta.name}">Nombre</span><small th:if="${cuenta.userId == usuarioActivoId}">Activa</small></button>
+              </form>
+              <p th:if="${cuentasDemo == null or #lists.isEmpty(cuentasDemo)}" class="text-muted small">No hay cuentas disponibles.</p>
+            </div>
+            <a th:href="@{/usuarios/registro}" class="btn btn-outline-primary w-100 mt-2">Crear cuenta</a>
+          </div>
+        </details>
+        <form th:if="${usuarioActivoId != null}" th:action="@{/sesion/salir}" method="post"><button class="btn btn-outline-light btn-sm" type="submit">Salir</button></form>
+      </div>
+    </div>
+  </div>
+</nav>
+<aside class="sidebar" th:fragment="lateral">
+  <div class="sidebar-heading">NAVEGACIÓN</div>
+  <a th:href="@{/}"><span class="nav-icon">⌂</span> Inicio</a>
+  <a th:href="@{/publicaciones}"><span class="nav-icon">▦</span> Muro</a>
+  <a th:href="@{/explorar/recomendadas}"><span class="nav-icon">☆</span> Recomendados</a>
+  <a th:href="@{/publicaciones/mias}"><span class="nav-icon">▤</span> Mis publicaciones</a>
+  <a th:href="@{/propuestas}"><span class="nav-icon">⇆</span> Propuestas</a>
+  <a th:href="@{/actividades}"><span class="nav-icon">◷</span> Actividades</a>
+  <a th:href="@{/billetera}"><span class="nav-icon">◈</span> Billetera</a>
+  <a th:href="@{/perfil}"><span class="nav-icon">◉</span> Perfil</a>
+  <a th:href="@{/usuarios}"><span class="nav-icon">♟</span> Usuarios</a>
+  <div class="sidebar-note">Cada hora compartida cuenta.<br>Intercambia ayuda con phelts.</div>
+</aside>
+<div th:fragment="alertas" id="alertas" aria-live="polite">
+  <div th:if="${exito != null}" class="alert alert-success alert-dismissible fade show shadow-sm" role="status">
+    <strong>Listo.</strong> <span th:text="${exito}">Acción completada</span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+  </div>
+  <div th:if="${error != null}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+    <strong>No se pudo completar.</strong> <span th:text="${error}">Inténtalo nuevamente.</span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+  </div>
+</div>
+<footer class="app-footer" th:fragment="pie"><span>© PHELTI — Plataforma de Intercambio de Tiempo</span><span>Modo de demostración</span></footer>
+<span th:fragment="estado(valor)" class="badge rounded-pill badge-state" th:classappend="${'state-' + valor}" th:switch="${valor}">
+  <span th:case="'PUBLISHED'">Publicada</span>
+  <span th:case="'IN_PROGRESS'">En proceso</span>
+  <span th:case="'COMPLETED'">Completada</span>
+  <span th:case="'CANCELLED'">Cancelada</span>
+  <span th:case="'SCHEDULED'">Programada</span>
+  <span th:case="'PENDING'">Pendiente</span>
+  <span th:case="'ACCEPTED'">Aceptada</span>
+  <span th:case="'REJECTED'">Rechazada</span>
+  <span th:case="'WITHDRAWN'">Retirada</span>
+  <span th:case="*">Estado no disponible</span>
+</span>
+<span th:fragment="tipo(valor)" class="tag" th:text="${valor == 'OFFERS_SUPPORT' ? 'Ofrece apoyo' : (valor == 'NEEDS_SUPPORT' ? 'Necesita apoyo' : 'Tipo no disponible')}">Tipo</span>
+<span th:fragment="modalidad(valor)" th:text="${valor == 'VIRTUAL' ? 'Virtual' : (valor == 'PRESENTIAL' ? 'Presencial' : 'No definida')}">Modalidad</span>
+<span th:fragment="dia(valor)" th:switch="${valor}">
+  <span th:case="'MONDAY'">Lunes</span><span th:case="'TUESDAY'">Martes</span>
+  <span th:case="'WEDNESDAY'">Miércoles</span><span th:case="'THURSDAY'">Jueves</span>
+  <span th:case="'FRIDAY'">Viernes</span><span th:case="'SATURDAY'">Sábado</span>
+  <span th:case="'SUNDAY'">Domingo</span><span th:case="*" th:text="${valor}">Día</span>
+</span>
+</body></html>
